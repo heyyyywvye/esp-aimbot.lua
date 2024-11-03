@@ -1,0 +1,63 @@
+-- Script to highlight all players with an extra-large visible name display through walls
+
+-- Function to create ESP highlight and larger BillboardGui for a player
+local function highlightPlayer(player)
+    if player.Character then
+        -- Add a Highlight object to the player's character
+        local highlight = Instance.new("Highlight")
+        highlight.Adornee = player.Character
+        highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red color for fill
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- White outline
+        highlight.FillTransparency = 0.5 -- Adjust for visibility
+        highlight.OutlineTransparency = 0 -- Visible outline
+        highlight.Parent = player.Character
+
+        -- Create a BillboardGui to show the player's name above their head
+        local head = player.Character:FindFirstChild("Head")
+        if head then
+            local billboard = Instance.new("BillboardGui")
+            billboard.Name = "NameDisplay"
+            billboard.Adornee = head
+            billboard.Size = UDim2.new(20, 0, 5, 0) -- Extra-large size for better visibility
+            billboard.StudsOffset = Vector3.new(0, 5, 0) -- Increase offset to keep above player
+            billboard.AlwaysOnTop = true -- Visible through walls
+            billboard.Parent = head
+
+            -- Create a TextLabel for the name inside the BillboardGui
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Text = player.Name
+            nameLabel.Size = UDim2.new(1, 0, 1, 0)
+            nameLabel.BackgroundTransparency = 1
+            nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- White color
+            nameLabel.TextStrokeTransparency = 0.1 -- Thicker stroke for visibility
+            nameLabel.Font = Enum.Font.SourceSansBold
+            nameLabel.TextScaled = true
+            nameLabel.TextSize = 100 -- Extra-large font size
+            nameLabel.Parent = billboard
+        end
+    end
+end
+
+-- Apply ESP and name display for all current players
+for _, player in pairs(game.Players:GetPlayers()) do
+    highlightPlayer(player)
+end
+
+-- Handle new players joining
+game.Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        highlightPlayer(player)
+    end)
+end)
+
+-- Remove ESP and name display when player leaves
+game.Players.PlayerRemoving:Connect(function(player)
+    if player.Character then
+        if player.Character:FindFirstChild("Highlight") then
+            player.Character.Highlight:Destroy()
+        end
+        if player.Character:FindFirstChild("NameDisplay") then
+            player.Character.NameDisplay:Destroy()
+        end
+    end
+end)
